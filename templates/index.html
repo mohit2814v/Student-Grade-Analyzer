@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPredict ML - Student Performance Predictor</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+                </svg>
+                <div class="brand-text">
+                    <h1>EduPredict <span class="accent">ML</span></h1>
+                    <span class="subtext">Offline AI Analytics</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="home">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Dashboard Home</span>
+                </button>
+                <button class="nav-item" data-tab="dataset">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    <span>Manage Dataset</span>
+                </button>
+                <button class="nav-item" data-tab="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
+                    <span>Dataset Viewer</span>
+                </button>
+                <button class="nav-item" data-tab="train">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>Train ML Models</span>
+                </button>
+                <button class="nav-item" data-tab="predict">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+                    <span>Predict Student</span>
+                </button>
+                <button class="nav-item" data-tab="history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    <span>Prediction History</span>
+                </button>
+                <button class="nav-item" data-tab="about">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <span>About System</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status-badge offline">
+                    <span class="indicator"></span>
+                    <span>Running Fully Offline</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="top-bar">
+                <div class="page-title">
+                    <h2 id="current-panel-title">Dashboard Overview</h2>
+                </div>
+                <div class="system-status">
+                    <div class="status-pill">
+                        <span class="label">Dataset:</span>
+                        <span class="val" id="status-dataset">Loading...</span>
+                    </div>
+                    <div class="status-pill">
+                        <span class="label">Active Model:</span>
+                        <span class="val" id="status-model">Loading...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Notification Area -->
+            <div id="toast-container"></div>
+
+            <!-- Content Panels -->
+            <div class="panel-container">
+                
+                <!-- HOME PANEL -->
+                <section class="panel active" id="panel-home">
+                    <div class="welcome-banner">
+                        <div class="banner-content">
+                            <h2>Predict & Optimize Student Performance</h2>
+                            <p>Leverage offline Machine Learning algorithms to discover insights, compare model accuracies, and generate personalized academic recommendations.</p>
+                            <div class="banner-actions">
+                                <button class="btn btn-primary" onclick="switchTab('predict')">New Student Prediction</button>
+                                <button class="btn btn-secondary" onclick="switchTab('train')">Train Models</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-val" id="stat-total-students">0</span>
+                                <span class="stat-label">Dataset Records</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-val" id="stat-pass-rate">0%</span>
+                                <span class="stat-label">Average Pass Rate</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-val" id="stat-avg-score">0.0%</span>
+                                <span class="stat-label">Average Score</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-val" id="stat-best-model">None</span>
+                                <span class="stat-label">Best Active Classifier</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-val" id="stat-latest-prediction-score">--%</span>
+                                <span class="stat-label">Latest Predicted Grade</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-val" id="stat-total-predictions">0</span>
+                                <span class="stat-label">Total Predictions Run</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LATEST STUDENT PREDICTION LIVE WIDGET ON DASHBOARD -->
+                    <div class="card w-full mb-6 dashboard-prediction-card" id="dashboard-latest-prediction-card">
+                        <div class="card-header report-header-flex">
+                            <div>
+                                <span class="badge info mb-2">Live AI Evaluation Result</span>
+                                <h3 id="dash-pred-student-name">No Prediction Run Yet</h3>
+                                <span class="subtitle" id="dash-pred-date">Submit a student in the Prediction panel to view live results here</span>
+                            </div>
+                            <div class="export-actions-group">
+                                <button class="btn btn-primary btn-sm" onclick="exportPredictedGradeReport('csv')" id="dash-btn-export" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Export Grade Report
+                                </button>
+                                <button class="btn btn-secondary btn-sm" onclick="switchTab('predict')">
+                                    New Student Prediction
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="dash-prediction-summary-grid">
+                                <div class="dash-pred-metric">
+                                    <span class="dash-metric-label">Predicted Score</span>
+                                    <span class="dash-metric-value text-purple" id="dash-pred-score">--%</span>
+                                </div>
+                                <div class="dash-pred-metric">
+                                    <span class="dash-metric-label">Predicted Grade</span>
+                                    <span class="dash-metric-value" id="dash-pred-grade">--</span>
+                                </div>
+                                <div class="dash-pred-metric">
+                                    <span class="dash-metric-label">Status</span>
+                                    <span id="dash-pred-status-badge" class="badge">--</span>
+                                </div>
+                                <div class="dash-pred-metric">
+                                    <span class="dash-metric-label">Performance Category</span>
+                                    <span id="dash-pred-category" class="dash-metric-sub">--</span>
+                                </div>
+                                <div class="dash-pred-metric">
+                                    <span class="dash-metric-label">Confidence</span>
+                                    <span class="dash-metric-sub" id="dash-pred-confidence">--%</span>
+                                </div>
+                            </div>
+                            <div class="dash-pred-suggestion mt-4" id="dash-pred-suggestion"></div>
+                        </div>
+                    </div>
+
+                    <!-- ADVANCED ANALYTICS & ML VISUALIZATIONS 2x2 GRID -->
+                    <div class="dashboard-4charts-grid mb-6">
+                        <!-- 1. Student Grade Distribution (Bell Curve & Histogram) -->
+                        <div class="card">
+                            <div class="card-header report-header-flex">
+                                <div>
+                                    <h3>Student Grade Distribution</h3>
+                                    <span class="subtitle">Continuous score histogram showing bell curve & 50% passing threshold</span>
+                                </div>
+                                <span class="badge pass">Distribution</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-grades-bellcurve" class="chart-container" style="min-height: 270px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Variables Correlation Heatmap -->
+                        <div class="card">
+                            <div class="card-header report-header-flex">
+                                <div>
+                                    <h3>Variables Correlation Heatmap</h3>
+                                    <span class="subtitle">Linear relationship matrix between academic & lifestyle predictors</span>
+                                </div>
+                                <span class="badge info">Pearson r</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-correlation-heatmap" class="chart-container" style="min-height: 270px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Regression Evaluation: Actual vs. Predicted -->
+                        <div class="card">
+                            <div class="card-header report-header-flex">
+                                <div>
+                                    <h3>Regression Evaluation: Actual vs. Predicted</h3>
+                                    <span class="subtitle">Scatter evaluation of ground-truth student marks vs model inference</span>
+                                </div>
+                                <span class="badge purple">R² Fit</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-actual-vs-pred" class="chart-container" style="min-height: 270px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Pipeline Feature Importances -->
+                        <div class="card">
+                            <div class="card-header report-header-flex">
+                                <div>
+                                    <h3>Pipeline Feature Importances</h3>
+                                    <span class="subtitle">Model regression coefficients showing primary positive & negative drivers</span>
+                                </div>
+                                <span class="badge info">Coefficients</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-feature-importance" class="chart-container" style="min-height: 270px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PREDICTED RESULTS ANALYTICS SECTION -->
+                    <div class="section-divider mt-6 mb-4">
+                        <div class="divider-line"></div>
+                        <span class="divider-label badge purple">Predicted Results Analytics</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <div class="dashboard-visuals-grid mb-6">
+                        <div class="card card-large">
+                            <div class="card-header report-header-flex">
+                                <div>
+                                    <h3>Predicted Results Grade Distribution</h3>
+                                    <span class="subtitle">Distribution of predicted grades (A, B, C, D, F) across AI evaluations</span>
+                                </div>
+                                <span class="badge info" id="badge-pred-count">0 Predictions</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-predicted-grades" class="chart-container">
+                                    <div class="empty-state">Run student predictions to view predicted grade distribution.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card card-small">
+                            <div class="card-header">
+                                <h3>Predicted Pass / Fail Ratio</h3>
+                                <span class="subtitle">Percentage of predicted passing students</span>
+                            </div>
+                            <div class="card-body centering">
+                                <div id="chart-predicted-pass-fail" class="chart-container">
+                                    <div class="empty-state">No predictions recorded.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DASHBOARD WHAT-IF SIMULATOR & PERFORMANCE BREAKDOWN -->
+                    <div class="dashboard-visuals-grid mb-6">
+                        <!-- Quick What-If Grade Simulator -->
+                        <div class="card card-large">
+                            <div class="card-header">
+                                <div>
+                                    <span class="badge purple mb-2">Interactive Tool</span>
+                                    <h3>Dashboard What-If Grade Simulator</h3>
+                                    <span class="subtitle">Adjust core study & attendance sliders to simulate expected student scores in real-time</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="whatif-simulator-grid">
+                                    <div class="whatif-controls">
+                                        <div class="slider-group mb-4">
+                                            <div class="label-with-badge">
+                                                <label>Study Hours / Week</label>
+                                                <span class="field-selection-badge badge-highlight" id="whatif-study-val">20 hrs</span>
+                                            </div>
+                                            <input type="range" id="whatif-study-slider" min="2" max="40" step="1" value="20" class="custom-range">
+                                        </div>
+                                        <div class="slider-group mb-4">
+                                            <div class="label-with-badge">
+                                                <label>Attendance Rate (%)</label>
+                                                <span class="field-selection-badge badge-highlight" id="whatif-attendance-val">85%</span>
+                                            </div>
+                                            <input type="range" id="whatif-attendance-slider" min="40" max="100" step="1" value="85" class="custom-range">
+                                        </div>
+                                        <div class="slider-group">
+                                            <div class="label-with-badge">
+                                                <label>Previous Marks (%)</label>
+                                                <span class="field-selection-badge badge-highlight" id="whatif-prev-val">75%</span>
+                                            </div>
+                                            <input type="range" id="whatif-prev-slider" min="30" max="100" step="1" value="75" class="custom-range">
+                                        </div>
+                                    </div>
+                                    <div class="whatif-result-box">
+                                        <span class="whatif-label">Estimated Final Score</span>
+                                        <div class="whatif-score" id="whatif-sim-score">78.4%</div>
+                                        <div class="whatif-badges">
+                                            <span class="badge pass" id="whatif-sim-grade">Grade C</span>
+                                            <span class="badge info" id="whatif-sim-status">PASS</span>
+                                        </div>
+                                        <p class="whatif-hint" id="whatif-sim-hint">Good progress. Boosting study hours to 25+ can lift score above 80%.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Predicted Performance Categories Breakdown -->
+                        <div class="card card-small">
+                            <div class="card-header">
+                                <h3>Predicted Performance Tier</h3>
+                                <span class="subtitle">Breakdown across evaluation history</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-predicted-categories" class="perf-breakdown-list">
+                                    <div class="empty-state">No evaluations recorded.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DATASET MANAGEMENT PANEL -->
+                <section class="panel" id="panel-dataset">
+                    <div class="dataset-layout-grid">
+                        <div class="card upload-card">
+                            <div class="card-header">
+                                <h3>Load CSV Dataset</h3>
+                                <span class="subtitle">Upload custom CSV files or generate sample training records</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="file-drop-area" id="file-drop-zone">
+                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                    </svg>
+                                    <p class="drop-text">Drag and drop student CSV file here</p>
+                                    <span class="or-separator">or</span>
+                                    <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">Browse Files</button>
+                                    <input type="file" id="file-input" accept=".csv" style="display: none;">
+                                </div>
+                                <div class="dataset-quick-actions">
+                                    <p class="action-desc">Don't have a dataset? Populate the system instantly with simulated, highly realistic student performance records.</p>
+                                    <button class="btn btn-secondary w-full" id="btn-generate-dataset">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                        Generate 1,000 Sample Records
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card metadata-card">
+                            <div class="card-header">
+                                <h3>Active Dataset Health Status</h3>
+                                <span class="subtitle">Validation check results, missing value detection, and structural summary</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="dataset-inactive-state" class="empty-state">
+                                    <p>No active dataset loaded. Please upload a CSV or generate a sample dataset.</p>
+                                </div>
+                                <div id="dataset-active-state" style="display: none;">
+                                    <div class="health-summary-box">
+                                        <div class="health-score-container">
+                                            <span class="health-label">File Name</span>
+                                            <span class="health-val" id="meta-filename">student_data.csv</span>
+                                        </div>
+                                        <button class="btn btn-danger btn-sm" id="btn-delete-dataset">Delete Dataset</button>
+                                    </div>
+                                    
+                                    <div class="validation-list">
+                                        <div class="validation-item" id="check-size">
+                                            <span class="val-icon"></span>
+                                            <div class="val-text">
+                                                <h4>Total Records Count</h4>
+                                                <p id="meta-total-records">0 rows loaded</p>
+                                            </div>
+                                        </div>
+                                        <div class="validation-item" id="check-columns">
+                                            <span class="val-icon"></span>
+                                            <div class="val-text">
+                                                <h4>Feature Columns Verification</h4>
+                                                <p id="meta-columns-status">Validating schema...</p>
+                                            </div>
+                                        </div>
+                                        <div class="validation-item" id="check-missing">
+                                            <span class="val-icon"></span>
+                                            <div class="val-text">
+                                                <h4>Missing Value Analysis</h4>
+                                                <p id="meta-missing-status">0 missing values detected</p>
+                                            </div>
+                                        </div>
+                                        <div class="validation-item" id="check-duplicates">
+                                            <span class="val-icon"></span>
+                                            <div class="val-text">
+                                                <h4>Duplicate Row Detection</h4>
+                                                <p id="meta-duplicates-status">0 duplicates detected</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DATASET VIEWER PANEL -->
+                <section class="panel" id="panel-viewer">
+                    <div class="card w-full">
+                        <div class="card-header table-header-flex">
+                            <div>
+                                <h3>Data Explorer</h3>
+                                <span class="subtitle">Query, filter, and inspect individual rows in the active training dataset</span>
+                            </div>
+                            <div class="table-search-box">
+                                <input type="text" id="viewer-search-input" placeholder="Search by name...">
+                                <button class="btn btn-primary" id="btn-viewer-search">Search</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-scroll-container">
+                                <table class="data-table" id="viewer-table">
+                                    <thead>
+                                        <tr id="viewer-table-headers">
+                                            <th>Loading headers...</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="viewer-table-body">
+                                        <tr>
+                                            <td colspan="100" class="text-center">No dataset loaded. Go to "Manage Dataset" to upload or generate data.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-pagination-footer">
+                                <span class="pagination-info" id="viewer-pagination-info">Showing 0-0 of 0 records</span>
+                                <div class="pagination-controls">
+                                    <button class="btn btn-secondary btn-sm" id="btn-prev-page" disabled>Previous</button>
+                                    <span class="page-number-indicator" id="current-page-num">1</span>
+                                    <button class="btn btn-secondary btn-sm" id="btn-next-page" disabled>Next</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TRAINING PANEL -->
+                <section class="panel" id="panel-train">
+                    <div class="train-layout-grid">
+                        <div class="card flex-grow-1">
+                            <div class="card-header">
+                                <h3>Model Pipeline Training Console</h3>
+                                <span class="subtitle">Train multiple algorithms on final score (regression) & pass/fail status (classification)</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="train-config-box">
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <div class="label-with-badge">
+                                                <label for="input-split-ratio">Test Split Ratio</label>
+                                                <span class="field-selection-badge" id="split-ratio-feedback">20% Test / 80% Train</span>
+                                            </div>
+                                            <select id="input-split-ratio" class="form-control interactive-select">
+                                                <option value="0.1">10% Test / 90% Train</option>
+                                                <option value="0.2" selected>20% Test / 80% Train</option>
+                                                <option value="0.3">30% Test / 70% Train</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="input-seed">Random State Seed</label>
+                                            <input type="number" id="input-seed" class="form-control" value="42">
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary w-full" id="btn-run-training">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                        Run Multi-Algorithm Training Pipeline
+                                    </button>
+                                </div>
+
+                                <div class="console-box-container">
+                                    <div class="console-header">
+                                        <span>System Process Logs</span>
+                                        <span class="console-indicator" id="console-pulse">● Idle</span>
+                                    </div>
+                                    <pre class="console-output" id="training-console-log">Ready to train. Please configure settings and click "Run Multi-Algorithm Training Pipeline".</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card w-full" id="training-results-card" style="display: none;">
+                            <div class="card-header">
+                                <h3>Evaluation & Comparison Table</h3>
+                                <span class="subtitle">Testing metrics compared across all 16 regression & classification algorithms</span>
+                            </div>
+                            <div class="card-body">
+                                <h4>Regression Models (Target: Score Prediction)</h4>
+                                <div class="table-scroll-container mb-6">
+                                    <table class="data-table compact-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Algorithm</th>
+                                                <th>Train R²</th>
+                                                <th>Test R²</th>
+                                                <th>MAE</th>
+                                                <th>RMSE</th>
+                                                <th>Train Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="regression-comparison-body">
+                                            <!-- populated dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <h4>Classification Models (Target: Pass/Fail Status)</h4>
+                                <div class="table-scroll-container">
+                                    <table class="data-table compact-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Algorithm</th>
+                                                <th>Train Acc</th>
+                                                <th>Test Acc</th>
+                                                <th>Precision</th>
+                                                <th>Recall</th>
+                                                <th>F1-Score</th>
+                                                <th>Train Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="classification-comparison-body">
+                                            <!-- populated dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PREDICTION FORM PANEL -->
+                <section class="panel" id="panel-predict">
+                    <!-- Default Prediction State -->
+                    <div id="predict-form-container">
+                        <form id="student-predict-form" class="prediction-form-card">
+                            <div class="form-section-header">
+                                <h3>Student Profile Data Entry</h3>
+                                <p>Provide details below to estimate final percentage scores, assign performance categories, and generate optimization recommendations.</p>
+                            </div>
+                            
+                            <!-- Grid sections -->
+                            <div class="form-sections-grid">
+                                
+                                <!-- Section 1: Demographics & Habits -->
+                                <div class="form-card-column">
+                                    <h4 class="form-sub-header">Personal Info & Habits</h4>
+                                    
+                                    <div class="form-group">
+                                        <label for="pred-name">Student Full Name</label>
+                                        <input type="text" id="pred-name" class="form-control" placeholder="Enter name" required>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="pred-age">Age (Years)</label>
+                                            <input type="number" id="pred-age" class="form-control" min="15" max="25" value="18" required>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="pred-gender">Gender</label>
+                                            <select id="pred-gender" class="form-control" required>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="pred-study-hours">Study Hours / Day</label>
+                                            <input type="number" step="0.1" id="pred-study-hours" class="form-control" min="1" max="10" value="5.0" required>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="pred-sleep-hours">Sleep Hours / Night</label>
+                                            <input type="number" step="0.1" id="pred-sleep-hours" class="form-control" min="4" max="10" value="7.5" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="pred-attendance">Attendance %</label>
+                                            <input type="number" step="0.1" id="pred-attendance" class="form-control" min="50" max="100" value="85.0" required>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="pred-discipline">Discipline Score (1-10)</label>
+                                            <input type="number" step="0.1" id="pred-discipline" class="form-control" min="1" max="10" value="8.0" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section 2: Environment & Social -->
+                                <div class="form-card-column">
+                                    <h4 class="form-sub-header">Environmental Factors</h4>
+                                    
+                                    <div class="form-group">
+                                        <div class="label-with-badge">
+                                            <label for="pred-parent-edu">Parental Education Level</label>
+                                            <span class="field-selection-badge" id="parent-edu-feedback">Medium (College / Diploma)</span>
+                                        </div>
+                                        <select id="pred-parent-edu" class="form-control interactive-select" required>
+                                            <option value="Low">Low (High School or less)</option>
+                                            <option value="Medium" selected>Medium (College / Diploma)</option>
+                                            <option value="High">High (University Graduate / Higher)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="pred-internet">Internet at Home?</label>
+                                            <select id="pred-internet" class="form-control" required>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="pred-family-support">Family Support?</label>
+                                            <select id="pred-family-support" class="form-control" required>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="pred-tuition">Extra Tuition/Coaching?</label>
+                                            <select id="pred-tuition" class="form-control" required>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No" selected>No</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="pred-extracurricular">Extracurriculars?</label>
+                                            <select id="pred-extracurricular" class="form-control" required>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No" selected>No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="pred-assignments">Assignments Completed (0-10)</label>
+                                            <input type="number" id="pred-assignments" class="form-control" min="0" max="10" value="8" required>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="pred-participation">Participation Score (1-10)</label>
+                                            <input type="number" step="0.1" id="pred-participation" class="form-control" min="1" max="10" value="7.0" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section 3: Academic Scores -->
+                                <div class="form-card-column">
+                                    <h4 class="form-sub-header">Academic Scores</h4>
+                                    
+                                    <div class="form-group">
+                                        <label for="pred-prev-marks">Previous Semester Score %</label>
+                                        <input type="number" step="0.1" id="pred-prev-marks" class="form-control" min="40" max="100" value="70.0" required>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="pred-internal-marks">Internal Marks (0-30)</label>
+                                            <input type="number" step="0.1" id="pred-internal-marks" class="form-control" min="0" max="30" value="20.0" required>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="pred-practical-marks">Practical Marks (0-30)</label>
+                                            <input type="number" step="0.1" id="pred-practical-marks" class="form-control" min="0" max="30" value="20.0" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="pred-quiz-marks">Quiz Marks (0-20)</label>
+                                            <input type="number" step="0.1" id="pred-quiz-marks" class="form-control" min="0" max="20" value="14.0" required>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="pred-project-marks">Project Marks (0-50)</label>
+                                            <input type="number" step="0.1" id="pred-project-marks" class="form-control" min="0" max="50" value="35.0" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="reset" class="btn btn-secondary">Clear Fields</button>
+                                <button type="submit" class="btn btn-primary" id="btn-submit-prediction">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                    Generate Performance Prediction
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Prediction Result View -->
+                    <div id="predict-result-container" style="display: none;">
+                        <div class="result-layout">
+                            <div class="result-left-column">
+                                <div class="card result-score-card">
+                                    <div class="card-header">
+                                        <h3 id="result-student-name">Student Name</h3>
+                                        <span class="subtitle" id="result-prediction-date">Prediction Generated: Date</span>
+                                    </div>
+                                    <div class="card-body centering flex-direction-col">
+                                        <!-- Gauge Visual -->
+                                        <div class="gauge-wrapper">
+                                            <svg class="gauge-ring" viewBox="0 0 100 100">
+                                                <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+                                                <circle class="gauge-fill" id="result-gauge-fill" cx="50" cy="50" r="45"></circle>
+                                            </svg>
+                                            <div class="gauge-text-container">
+                                                <span class="gauge-value" id="result-percentage">0.0%</span>
+                                                <span class="gauge-label">Final Score</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="badges-row">
+                                            <span class="badge" id="result-status-badge">PASS</span>
+                                            <span class="badge" id="result-grade-badge">Grade A</span>
+                                            <span class="badge" id="result-category-badge">Very Good</span>
+                                        </div>
+
+                                        <div class="confidence-box">
+                                            <span class="label">Prediction Confidence Rating:</span>
+                                            <span class="val" id="result-confidence">0.0%</span>
+                                        </div>
+                                        
+                                        <div class="model-info-box">
+                                            <span class="label">Models Loaded:</span>
+                                            <span class="val" id="result-model-used">Model metadata</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-secondary w-full" id="btn-back-to-form">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><polyline points="15 18 9 12 15 6"/></svg>
+                                    Enter Details for Another Student
+                                </button>
+                            </div>
+
+                            <div class="result-right-column">
+                                <div class="card suggestions-card">
+                                    <div class="card-header report-header-flex">
+                                        <div>
+                                            <h3>AI Academic Advisory Report</h3>
+                                            <span class="subtitle">Interventions and study tips derived from student behaviors</span>
+                                        </div>
+                                        <div class="export-btn-group">
+                                            <button class="btn btn-primary btn-sm" onclick="exportPredictedGradeReport('csv')" title="Download predicted grade report as CSV">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                                Export Grade (CSV)
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm" onclick="exportPredictedGradeReport('json')" title="Download predicted grade report as JSON">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                                Export Grade (JSON)
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm" onclick="exportPredictedGradeReport('print')" title="Print or Save Report as PDF">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                                                Print / PDF Report
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="suggestions-list" id="result-suggestions-list">
+                                            <!-- Recommendations list items injected here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- HISTORY PANEL -->
+                <section class="panel" id="panel-history">
+                    <div class="card w-full">
+                        <div class="card-header table-header-flex">
+                            <div>
+                                <h3>Prediction Records Database</h3>
+                                <span class="subtitle">Review historical offline performance evaluations and generated suggestions</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn btn-primary btn-sm" onclick="exportHistoryCSV()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Export All Grades (CSV)
+                                </button>
+                                <button class="btn btn-danger btn-sm" id="btn-clear-history">Clear Database History</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-scroll-container">
+                                <table class="data-table" id="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Student Name</th>
+                                            <th>Attendance</th>
+                                            <th>Study Hours</th>
+                                            <th>Prev Marks</th>
+                                            <th>Predicted Score</th>
+                                            <th>Grade</th>
+                                            <th>Status</th>
+                                            <th>Performance Category</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <tr>
+                                            <td colspan="10" class="text-center">No predictions made yet. Go to "Predict Student" to write predictions.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ABOUT PANEL -->
+                <section class="panel" id="panel-about">
+                    <div class="about-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>System Overview</h3>
+                            </div>
+                            <div class="card-body text-content">
+                                <p><strong>EduPredict ML</strong> is a local, offline classroom analytics platform built for educators, schools, and academic advisors. The system predicts final grades, evaluates student pass-rates, and details study habit corrections using 16 advanced machine learning algorithms.</p>
+                                <p>By operating entirely offline on SQLite and local file systems, the tool enforces strict data privacy, ensuring no student profiles are ever leaked to external cloud platforms or unauthorized APIs.</p>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>ML Engineering Pipeline</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="pipeline-flow">
+                                    <div class="pipeline-step">
+                                        <div class="step-num">1</div>
+                                        <div class="step-lbl">CSV Clean & Drop Duplicates</div>
+                                    </div>
+                                    <div class="pipeline-step">
+                                        <div class="step-num">2</div>
+                                        <div class="step-lbl">Outlier Capping & Imputation</div>
+                                    </div>
+                                    <div class="pipeline-step">
+                                        <div class="step-num">3</div>
+                                        <div class="step-lbl">Categorical Label Encoding</div>
+                                    </div>
+                                    <div class="pipeline-step">
+                                        <div class="step-num">4</div>
+                                        <div class="step-lbl">Numeric Scaling & Z-score</div>
+                                    </div>
+                                    <div class="pipeline-step">
+                                        <div class="step-num">5</div>
+                                        <div class="step-lbl">Multi-model Training & Evaluation</div>
+                                    </div>
+                                    <div class="pipeline-step">
+                                        <div class="step-num">6</div>
+                                        <div class="step-lbl">Serialize Best Regressor & Classifier</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
